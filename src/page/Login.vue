@@ -24,43 +24,57 @@
       <a-input-password v-model:value="formState.password" />
     </a-form-item>
 
-    <a-form-item name="remember" :wrapper-col="{ offset: 8, span: 16 }">
-      <a-checkbox v-model:checked="formState.remember">Remember me</a-checkbox>
-    </a-form-item>
-
     <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
-      <a-button type="primary" html-type="submit">Submit</a-button>
+      <a-button html-type="submit" @click="isLogin = false">注册</a-button>
+      <a-button type="primary" html-type="submit" @click="isLogin = true"
+        >登陆</a-button
+      >
     </a-form-item>
   </a-form>
 </template>
 <script lang="ts">
-import { defineComponent, reactive } from "vue";
-
-interface FormState {
-  username: string;
-  password: string;
-  remember: boolean;
-}
+import { message } from "ant-design-vue";
+import { defineComponent, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
+import { useStore } from "vuex";
+import { LoginInfo, loginReq, registerReq } from "../request";
 export default defineComponent({
   setup() {
-    const formState = reactive<FormState>({
+    const formState = reactive<LoginInfo>({
       username: "",
       password: "",
-      remember: true,
     });
+    const isLogin = ref(false);
+    const router = useRouter()
+    const store = useStore()
+    
     const onFinish = (values: any) => {
-      console.log("Success:", values);
+      if (isLogin.value) {
+        loginReq(values).then(({ token, user }) => {
+          message.success('登陆成功')
+          router.push('/home')
+          store.commit('setUserInfo', user)
+          localStorage.setItem("token", token);
+        });
+      } else {
+        registerReq(values).then(() => {
+          message.success('注册成功')
+        })
+        
+      }
     };
 
     const onFinishFailed = (errorInfo: any) => {
       console.log("Failed:", errorInfo);
     };
     return {
+      isLogin,
       formState,
       onFinish,
       onFinishFailed,
     };
   },
+  
 });
 </script>
 
