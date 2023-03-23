@@ -6,14 +6,14 @@ const instance = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-instance.interceptors.request.use(function(config) {
+instance.interceptors.request.use(function (config) {
   config.headers.setAuthorization(localStorage.getItem('token'))
   return config
 })
 
-instance.interceptors.response.use(function ({data}) {
-  
-  
+instance.interceptors.response.use(function ({ data }) {
+
+
   if (data.code != 200) {
     message.error(data.msg)
     return Promise.reject()
@@ -30,14 +30,27 @@ export interface LoginInfo {
 function loginReq<R = any>(data: LoginInfo): Promise<R> {
   return instance.post('/user/login', data)
 }
+function logoutReq<R=any>(): Promise<R> {
+  return instance.post('/user/logout')
+}
 
 function registerReq<R = any>(data: LoginInfo): Promise<R> {
   return instance.post('/user/register', data)
 }
 
+function userInfoReq<R = any>(id: string): Promise<R> {
+  return instance.get(`/user/${id}`)
+}
+
+function uploadReq<R = any>(data: { media: Blob }): Promise<R> {
+  return instance.post('/user/upload', data)
+}
 
 export {
   loginReq,
-  registerReq
+  registerReq,
+  userInfoReq,
+  uploadReq,
+  logoutReq
 }
 

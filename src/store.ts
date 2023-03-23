@@ -1,14 +1,28 @@
 import { createStore } from 'vuex'
 
-const store = createStore({
-  state () {
+
+interface LoginInfo {
+  token?: string,
+  user?: { [key: string]: any }
+}
+
+
+interface AppStore {
+  loginInfo: LoginInfo
+}
+
+const store = createStore<AppStore>({
+  state() {
     return {
-      userInfo: {}
+      loginInfo: {}
     }
   },
   mutations: {
-    setUserInfo(state, info) {
-      state.userInfo = info
+    resetLoginInfo(state) {
+      state.loginInfo = {}
+    },
+    setLoginInfo(state, info: LoginInfo) {
+      state.loginInfo = info
     }
   }
 })
