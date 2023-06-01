@@ -4,7 +4,7 @@ import store from './store'
 
 import App from './App.vue'
 import router from './router'
-import { DatePicker, Form, Button, Input, Layout, Dropdown, Menu, Space, Row, Col, Avatar, Badge, Table, PageHeader, Tag } from 'ant-design-vue'
+import { DatePicker, Form, Button, Input, Layout, Dropdown, Menu, Space, Row, Col, Avatar, Badge, Table, PageHeader, Tag, Modal, Upload } from 'ant-design-vue'
 
 const app = createApp(App)
 // useStore()内部使用inject()实现只能组件内使用
@@ -37,4 +37,6 @@ app.use(store)
   .use(Table)
   .use(PageHeader)
   .use(Tag)
+  .use(Modal)
+  .use(Upload)
   .mount('#app')

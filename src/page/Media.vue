@@ -3,7 +3,7 @@
 <template>
   <a-page-header title="媒体" sub-title="我的媒体列表" @back="() => null">
     <template #extra>
-      <a-button type="primary">新建媒体</a-button>
+      <a-button type="primary" @click="visible = true">新建媒体</a-button>
     </template>
   </a-page-header>
   <a-table :columns="columns" :data-source="data">
@@ -12,7 +12,9 @@
         <span> {{ record.size }}kb </span>
       </template>
       <template v-else-if="column.key === 'status'">
-        <a-tag :color="statusMap[record.status]?.c">{{statusMap[record.status]?.t}}</a-tag>
+        <a-tag :color="statusMap[record.status]?.c">{{
+          statusMap[record.status]?.t
+        }}</a-tag>
       </template>
       <template v-else-if="column.key === 'action'">
         <span>
@@ -28,10 +30,33 @@
       </template>
     </template>
   </a-table>
+  <a-modal v-model:visible="visible" title="Title" @ok="handleOk">
+    <template #footer>
+      <a-button key="back" @click="handleCancel">取消</a-button>
+      <a-button key="submit" type="primary" :loading="loading" @click="handleOk"
+        >确定</a-button
+      >
+    </template>
+    <a-upload
+      v-model:file-list="fileList"
+      name="file"
+      action="http://10.11.72.58:3000/user/upload"
+      :headers="headers"
+      :progress="progress"
+      @change="handleChange"
+    >
+      <a-button>
+        <upload-outlined></upload-outlined>
+        Click to Upload
+      </a-button>
+    </a-upload>
+  </a-modal>
 </template>
 <script lang="ts">
-import { DownOutlined } from "@ant-design/icons-vue";
-import { defineComponent } from "vue";
+import { DownOutlined, UploadOutlined } from "@ant-design/icons-vue";
+import { defineComponent, ref } from "vue";
+import { message, UploadChangeParam, UploadProps } from "ant-design-vue";
+import { useStore } from "vuex";
 const columns = [
   {
     name: "文件名",
@@ -101,12 +126,62 @@ const statusMap = {
 export default defineComponent({
   components: {
     DownOutlined,
+    UploadOutlined,
   },
   setup() {
+    const store = useStore()
+    const loading = ref<boolean>(false);
+    const visible = ref<boolean>(false);
+    const handleOk = () => {
+      loading.value = true;
+      setTimeout(() => {
+        loading.value = false;
+        visible.value = false;
+      }, 2000);
+    };
+
+    const handleCancel = () => {
+      visible.value = false;
+    };
+    const handleChange = (info: UploadChangeParam) => {
+      if (info.file.status !== "uploading") {
+        console.log(info.file, info.fileList);
+      }
+      if (info.file.status === "done") {
+        message.success(`${info.file.name} file uploaded successfully`);
+      } else if (info.file.status === "error") {
+        message.error(`${info.file.name} file upload failed.`);
+      }
+    };
+
+    const fileList = ref([]);
+    const progress: UploadProps["progress"] = {
+      strokeColor: {
+        "0%": "#108ee9",
+        "100%": "#87d068",
+      },
+      strokeWidth: 3,
+      format: (percent) => {
+        console.log(percent, 'percent');
+        
+        return `${parseFloat(percent.toFixed(2))}%`
+      },
+      class: "test",
+    };
     return {
+      fileList,
+      progress,
+      handleChange,
+      handleCancel,
+      handleOk,
+      visible,
+      loading,
       statusMap,
       data,
       columns,
+      headers: {
+        Authorization: store.state.loginInfo?.token,
+      },
     };
   },
 });

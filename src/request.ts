@@ -1,13 +1,21 @@
 import axios from "axios";
 import { message } from 'ant-design-vue'
 const instance = axios.create({
-  baseURL: 'http://10.11.72.58:3000/',
+  baseURL: 'http://10.11.72.11:3000/',
   timeout: 1000,
   headers: { 'Content-Type': 'application/json' },
 });
 
 instance.interceptors.request.use(function (config) {
-  config.headers.setAuthorization(localStorage.getItem('token'))
+  try {
+    let loginInfo = JSON.parse(localStorage.getItem('loginInfo'))
+    config.headers.setAuthorization(loginInfo.token)
+  } catch (e) {
+    console.log(e);
+  }
+
+  console.log(config);
+
   return config
 })
 
@@ -30,7 +38,7 @@ export interface LoginInfo {
 function loginReq<R = any>(data: LoginInfo): Promise<R> {
   return instance.post('/user/login', data)
 }
-function logoutReq<R=any>(): Promise<R> {
+function logoutReq<R = any>(): Promise<R> {
   return instance.post('/user/logout')
 }
 
